@@ -16,12 +16,25 @@
 
 package pe.chalk.minecraft;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * @author ChalkPE <chalkpe@gmail.com>
  * @since 2015-11-16
  */
 public class PocketHeaderBuilder {
-    public static void main(String[] args){
-        System.out.println(OnlineDemangler.demangle("_ZNK8KxVectorI16KxfArcFileRecordjEixEj"));
+    public static void main(String[] args) throws IOException {
+        if(args.length < 1) throw new IllegalArgumentException("Empty argument");
+
+        Path path = Paths.get(args[0]);
+        if(!Files.exists(path) || !Files.isRegularFile(path) || !Files.isReadable(path)) throw new IllegalArgumentException("Invalid path: " + path.toAbsolutePath().toString());
+
+        Files.lines(path, StandardCharsets.UTF_8).forEach(line -> {
+            //TODO: Implement this block
+        });
     }
 }
