@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author ChalkPE <chalkpe@gmail.com>
@@ -41,14 +42,40 @@ public class Header {
             if(Files.notExists(path.getParent())) Files.createDirectories(path.getParent());
 
             try(final BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)){
-                //TODO: Implement this stuff
-
-                writer.write("public: ");
+                writer.write("#pragma once"); writer.newLine();
                 writer.newLine();
+                writer.write("class " + this.getClassName()); writer.newLine();
+                writer.write("{"); writer.newLine();
+                writer.write("public: "); writer.newLine();
 
-                this.getFunctions().parallelStream().forEach(function -> {
+                final String demangled = OnlineDemangler.demangle(this.getFunctions().parallelStream().collect(Collectors.joining("\n")));
+                if(demangled != null) Arrays.stream(demangled.split("\\n")).parallel().distinct().map(function -> {
+                    function = function.replaceAll("&", " &");
+                    function = function.replaceAll("\\*", " *");
 
+                    int open = function.indexOf('(');
+                    if(open >= 0){
+                        int index = function.indexOf("::");
+                        if(index >= 0 && index < open){
+                            function = function.substring(index + 2);
+                        }
+                    }
+
+                    int close = close = function.lastIndexOf(')');
+                    if(close >= 0){
+                        function = function.substring(0, close + 1);
+                    }
+
+                    return function;
+                }).forEachOrdered(function -> {
+                    try{
+                        writer.write("    virtual void " + function + ";"); writer.newLine();
+                    }catch(Exception e){
+                        throw new RuntimeException(e);
+                    }
                 });
+
+                writer.write("};"); writer.newLine();
             }
         }catch(Exception e){
             e.printStackTrace();

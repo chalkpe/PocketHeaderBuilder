@@ -18,6 +18,9 @@ package pe.chalk.minecraft;
 
 import org.jsoup.Jsoup;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * @author ChalkPE <chalkpe@gmail.com>
  * @since 2015-11-16
@@ -26,6 +29,8 @@ public class OnlineDemangler {
     private OnlineDemangler(){}
 
     public static String demangle(final String input){
+        Logger.getLogger("OnlineDemangler").log(Level.INFO, input);
+
         try{
             return Jsoup.connect("http://demangler.com/").data("input", input).post().select("div.responseSection > pre").first().text();
         }catch(Exception e){

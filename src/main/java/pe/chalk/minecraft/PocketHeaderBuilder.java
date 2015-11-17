@@ -35,6 +35,7 @@ public class PocketHeaderBuilder {
     public static final Pattern FUNCTION_PATTERN = Pattern.compile("^.data.rel.ro:[0-9a-fA-F]{8}\\s+DCD\\s+(.*)$");
 
     public static void main(String[] args) throws IOException {
+        long time = System.currentTimeMillis();
         if(args.length < 1) throw new IllegalArgumentException("Empty argument");
 
         final Path path = Paths.get(args[0]);
@@ -48,7 +49,7 @@ public class PocketHeaderBuilder {
                 else if(!list.isEmpty() && (matcher = FUNCTION_PATTERN.matcher(line)).find()){
                     final Header lastHeader = list.get(list.size() - 1);
                     if(lastHeader != null){
-                        final String function = OnlineDemangler.demangle(matcher.group(1));
+                        final String function = matcher.group(1);
                         if(function != null) lastHeader.addFunction(function);
                     }
                 }
@@ -61,5 +62,7 @@ public class PocketHeaderBuilder {
                 return list;
             }).parallelStream().forEach(Header::save);
         }
+
+        System.out.println((System.currentTimeMillis() - time) / 1000.0);
     }
 }
