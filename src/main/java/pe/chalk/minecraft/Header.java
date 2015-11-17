@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -57,17 +58,20 @@ public class Header {
                     if(open >= 0){
                         int index = function.indexOf("::");
                         if(index >= 0 && index < open){
+                            String methodClass = function.substring(0, index);
+                            if(!methodClass.equals(this.getClassName())) return null;
+
                             function = function.substring(index + 2);
                         }
                     }
 
-                    int close = close = function.lastIndexOf(')');
+                    int close = function.lastIndexOf(')');
                     if(close >= 0){
                         function = function.substring(0, close + 1);
                     }
 
                     return function;
-                }).forEachOrdered(function -> {
+                }).filter(Objects::nonNull).forEachOrdered(function -> {
                     try{
                         writer.write("    virtual void " + function + ";"); writer.newLine();
                     }catch(Exception e){
