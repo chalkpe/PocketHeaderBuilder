@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * @author ChalkPE <chalkpe@gmail.com>
@@ -39,24 +40,26 @@ public class PocketHeaderBuilder {
         final Path path = Paths.get(args[0]);
         if(!Files.exists(path) || !Files.isRegularFile(path) || !Files.isReadable(path)) throw new IllegalArgumentException("Invalid path: " + path.toAbsolutePath().toString());
 
-        Files.lines(path, StandardCharsets.UTF_8).reduce(new ArrayList<>(), (final ArrayList<Header> list, final String line) -> {
-            Matcher matcher;
+        try(Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)){
+            lines.reduce(new ArrayList<>(), (final ArrayList<Header> list, final String line) -> {
+                Matcher matcher;
 
-            if((matcher = VTABLE_PATTERN.matcher(line)).find()) list.add(new Header(matcher.group(1)));
-            else if(!list.isEmpty() && (matcher = FUNCTION_PATTERN.matcher(line)).find()){
-                final Header lastHeader = list.get(list.size() - 1);
-                if(lastHeader != null){
-                    final String function = OnlineDemangler.demangle(matcher.group(1));
-                    if(function != null) lastHeader.addFunction(function);
+                if((matcher = VTABLE_PATTERN.matcher(line)).find()) list.add(new Header(matcher.group(1)));
+                else if(!list.isEmpty() && (matcher = FUNCTION_PATTERN.matcher(line)).find()){
+                    final Header lastHeader = list.get(list.size() - 1);
+                    if(lastHeader != null){
+                        final String function = OnlineDemangler.demangle(matcher.group(1));
+                        if(function != null) lastHeader.addFunction(function);
+                    }
                 }
-            }
 
-            return list;
-        }, (a, b) -> {
-            final ArrayList<Header> list = new ArrayList<>(a.size() + b.size());
-            list.addAll(a); list.addAll(b);
+                return list;
+            }, (a, b) -> {
+                final ArrayList<Header> list = new ArrayList<>(a.size() + b.size());
+                list.addAll(a); list.addAll(b);
 
-            return list;
-        }).parallelStream().forEach(Header::save);
+                return list;
+            }).parallelStream().forEach(Header::save);
+        }
     }
 }
