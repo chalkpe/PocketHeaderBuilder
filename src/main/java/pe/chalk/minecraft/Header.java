@@ -66,14 +66,18 @@ public class Header {
                     }
 
                     int close = function.lastIndexOf(')');
-                    if(close >= 0){
-                        function = function.substring(0, close + 1);
-                    }
+                    if(close >= 0) function = function.substring(0, close + 1);
 
                     return function;
                 }).filter(Objects::nonNull).forEachOrdered(function -> {
+                    String prefix = "    ";
+                    if(function.equals("__imp___cxa_pure_virtual")) prefix += "//";
+
+                    prefix += "virtual ";
+                    if(!function.startsWith("~")) prefix += "void ";
+
                     try{
-                        writer.write("    virtual void " + function + ";"); writer.newLine();
+                        writer.write(prefix + function + ";"); writer.newLine();
                     }catch(Exception e){
                         throw new RuntimeException(e);
                     }
