@@ -83,7 +83,12 @@ public class Header {
                     }
                 });
 
-                writer.write("};"); writer.newLine();
+                writer.write("};"); writer.newLine(); writer.newLine();
+                writer.write("/* Created by PocketHeaderBuilder"); writer.newLine();
+                writer.write(" * "); writer.newLine();
+                writer.write(" * Licensed under the Apache License, Version 2.0"); writer.newLine();
+                writer.write(" * https://github.com/ChalkPE/PocketHeaderBuilder"); writer.newLine();
+                writer.write(" */"); writer.newLine();
             }
         }catch(Exception e){
             e.printStackTrace();
